@@ -13,6 +13,7 @@ int bridgeStatus = 0;
 float speed = 0.0;
 boolean resetView = false;
 boolean goPerspective = false;
+boolean goOrtho = false;
 
 GLuint texture = 0;
 BITMAP BMP;
@@ -46,8 +47,8 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 			bridgeStatus = 2;
 		else if (wParam == 'P')
 			goPerspective = true;
-		else if (wParam == 'N')
-			goPerspective = false;
+		else if (wParam == 'O')
+			goOrtho = true;
 		break;
 
 	default:
@@ -1323,7 +1324,6 @@ void londonBridge()
 	bridgePillar();
 	tunnel();
 	
-
 	//Duplicate Tunnel
 	glPushMatrix();
 	glTranslatef(0, 0, 0.8);
@@ -1410,8 +1410,16 @@ void londonBridge()
 void goPerspectiveView() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(90.0, 1.0, -1.0, 1.0);
-	glFrustum(-1.0, 1.0, -1.0, 1.0, 2, 10.0);
+	glScalef(0.5, 0.5, 0.5);
+	gluPerspective(60.0, 1.0, 1, 100);
+	glFrustum(-1, 1, -1, 1, 1, 100);
+}
+
+void goOrthoView() {
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glScalef(0.5, 0.5, 0.5);
+	glOrtho(-1, 1, -1, 1, 1, 100);
 }
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
@@ -1466,10 +1474,20 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
 			DispatchMessage(&msg);
 		}
 			
-		if (goPerspective)
+		if (goPerspective) 
+		{
 			goPerspectiveView();
-			
+			goPerspective = false;
+		}
+		
+		if(goOrtho)
+		{
+			goOrthoView();
+			goOrtho = false;
+		}
+
 		londonBridge();
+
 		SwapBuffers(hdc);
 	}
 
