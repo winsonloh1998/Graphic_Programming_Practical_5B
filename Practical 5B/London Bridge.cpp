@@ -14,6 +14,9 @@ float speed = 0.0;
 boolean resetView = false;
 boolean goPerspective = false;
 boolean goOrtho = false;
+boolean goBackOrigin = false;
+boolean goViewport = false;
+float zoomValue = 0.0;
 
 GLuint texture = 0;
 BITMAP BMP;
@@ -49,6 +52,26 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 			goPerspective = true;
 		else if (wParam == 'O')
 			goOrtho = true;
+		else if (wParam == 'B')
+			goBackOrigin = true;
+		else if (wParam == '1') 
+		{
+			zoomValue = 1;
+			goViewport = true;
+		}
+		else if (wParam == '2')
+		{
+			zoomValue = 0.5;
+			goViewport = true;
+		}
+		else if (wParam == '3')
+		{
+			zoomValue = 0.2;
+			goViewport = true;
+		}
+
+			
+			
 		break;
 
 	default:
@@ -1298,6 +1321,43 @@ void sea() {
 	glDeleteTextures(1, &texture);
 }
 
+void background() {
+	glBegin(GL_POLYGON);
+	glVertex3f(-2, 2, -2);
+	glVertex3f(2, 2, -2);
+	glVertex3f(2, -2, -2);
+	glVertex3f(-2, -2, -2);
+	glEnd();
+
+	glBegin(GL_POLYGON);
+	glVertex3f(-2, -2, -2);
+	glVertex3f(-2, -2, 2);
+	glVertex3f(-2, 2, 2);
+	glVertex3f(-2, 2, -2);
+	glEnd();
+
+	glBegin(GL_POLYGON);
+	glVertex3f(-2, 2, -2);
+	glVertex3f(-2, 2, 2);
+	glVertex3f(2, 2, 2);
+	glVertex3f(2, 2, -2);
+	glEnd();
+
+	glBegin(GL_POLYGON);
+	glVertex3f(2, 2, -2);
+	glVertex3f(2, 2, 2);
+	glVertex3f(2, -2, 2);
+	glVertex3f(2, -2, -2);
+	glEnd();
+
+	glBegin(GL_POLYGON);
+	glVertex3f(2, -2, 2);
+	glVertex3f(-2, -2, 2);
+	glVertex3f(-2, 2, 2);
+	glVertex3f(2, 2, 2);
+	glEnd();
+}
+
 void londonBridge()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1312,6 +1372,7 @@ void londonBridge()
 
 	glMatrixMode(GL_MODELVIEW);
 	//glColor3f(0, 0, 0);
+	//background();
 	sea();
 	lowerPart();
 	middle();
@@ -1404,8 +1465,8 @@ void londonBridge()
 
 	glPopMatrix();
 }
-
 //--------------------------------------------------------------------
+
 
 void goPerspectiveView() {
 	glMatrixMode(GL_PROJECTION);
@@ -1420,6 +1481,11 @@ void goOrthoView() {
 	glLoadIdentity();
 	glScalef(0.5, 0.5, 0.5);
 	glOrtho(-1, 1, -1, 1, 1, 100);
+}
+
+void goBackOriginView() {
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 }
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
@@ -1480,14 +1546,27 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
 			goPerspective = false;
 		}
 		
-		if(goOrtho)
+		if (goOrtho)
 		{
 			goOrthoView();
 			goOrtho = false;
 		}
 
-		londonBridge();
+		if (goBackOrigin) {
+			goBackOriginView();
+			goBackOrigin = false;
+		}
 
+		if (goViewport) {
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			glOrtho(-zoomValue, zoomValue, -zoomValue, zoomValue, -1, 1);
+			goViewport = false;
+			zoomValue = 0;
+		}
+
+		londonBridge();
+		
 		SwapBuffers(hdc);
 	}
 
